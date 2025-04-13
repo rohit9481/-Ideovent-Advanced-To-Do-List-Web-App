@@ -115,36 +115,134 @@ function App() {
 
         {/* Task Cards */}
         <div className="space-y-4">
-          {filteredTasks.map(task => (
-            <div key={task._id} className={`p-4 bg-white/20 backdrop-blur-md border-l-4 ${task.completed ? 'border-green-400' : 'border-yellow-300'} rounded-xl shadow-md flex justify-between items-center`}>
-              <div>
-                <h3 className={`text-lg font-bold ${task.completed ? 'line-through text-gray-300' : 'text-white'}`}>{task.title}</h3>
-                <p className="text-sm text-gray-200">{task.description}</p>
-                <p className="text-xs text-blue-200">📅 {new Date(task.dueDate).toLocaleDateString()} | 🏷️ {task.category}</p>
+          {filteredTasks.map((task) => (
+            <div
+              key={task._id}
+              className={`p-4 bg-white/20 backdrop-blur-md border-l-4 ${
+                task.completed ? 'border-green-400' : 'border-yellow-300'
+              } rounded-xl shadow-md flex justify-between items-center`}
+            >
+              <div className="flex flex-col w-full">
+                {task.isEditing ? (
+                  <>
+                    <input
+                      type="text"
+                      value={task.editTitle || task.title}
+                      onChange={(e) =>
+                        setTasks((prev) =>
+                          prev.map((t) =>
+                            t._id === task._id ? { ...t, editTitle: e.target.value } : t
+                          )
+                        )
+                      }
+                      className="text-lg font-bold mb-1 p-2 rounded bg-white/80"
+                    />
+                    <input
+                      type="text"
+                      value={task.editDescription || task.description}
+                      onChange={(e) =>
+                        setTasks((prev) =>
+                          prev.map((t) =>
+                            t._id === task._id ? { ...t, editDescription: e.target.value } : t
+                          )
+                        )
+                      }
+                      className="text-sm text-gray-600 p-2 rounded bg-white/80"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <h3
+                      className={`text-lg font-bold ${
+                        task.completed ? 'line-through text-gray-300' : 'text-white'
+                      }`}
+                    >
+                      {task.title}
+                    </h3>
+                    <p className="text-sm text-gray-200">{task.description}</p>
+                    <p className="text-xs text-blue-200">
+                      📅 {new Date(task.dueDate).toLocaleDateString()} | 🏷️ {task.category}
+                    </p>
+                  </>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" checked={task.completed} onChange={() => toggleTask(task._id, task.completed)} className="w-5 h-5" />
-                <button onClick={() => deleteTask(task._id)} className="text-red-400 hover:text-red-600 text-xl transition">🗑</button>
+
+              <div className="flex items-center gap-2 ml-4">
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() => toggleTask(task._id, task.completed)}
+                  className="w-5 h-5"
+                />
+
+                {task.isEditing ? (
+                  <button
+                    onClick={async () => {
+                      const updated = await axios.put(
+                        `http://localhost:5000/api/tasks/${task._id}`,
+                        {
+                          title: task.editTitle || task.title,
+                          description: task.editDescription || task.description,
+                        }
+                      );
+                      setTasks((prev) =>
+                        prev.map((t) =>
+                          t._id === task._id ? { ...updated.data, isEditing: false } : t
+                        )
+                      );
+                    }}
+                    className="text-green-400 text-xl"
+                  >
+                    ✔
+                  </button>
+                ) : (
+                  <button
+                    onClick={() =>
+                      setTasks((prev) =>
+                        prev.map((t) =>
+                          t._id === task._id
+                            ? {
+                                ...t,
+                                isEditing: true,
+                                editTitle: t.title,
+                                editDescription: t.description,
+                              }
+                            : t
+                        )
+                      )
+                    }
+                    className="text-yellow-400 hover:text-yellow-300 text-xl"
+                  >
+                    ✏
+                  </button>
+                )}
+
+                <button
+                  onClick={() => deleteTask(task._id)}
+                  className="text-red-400 hover:text-red-600 text-xl"
+                >
+                  🗑
+                </button>
               </div>
             </div>
           ))}
         </div>
-      </div>
 
-      {/* 🎉 Motivation Modal */}
-      {showMotivation && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 shadow-2xl text-center max-w-sm animate-bounce">
-            <h2 className="text-2xl font-bold mb-2 text-green-600">🎉 Great Job!</h2>
-            <p className="text-gray-700 mb-4">{motivationMessages[Math.floor(Math.random() * motivationMessages.length)]}</p>
-            <button onClick={() => setShowMotivation(false)} className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition">Close</button>
+        {/* 🎉 Motivation Modal */}
+        {showMotivation && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-8 shadow-2xl text-center max-w-sm animate-bounce">
+              <h2 className="text-2xl font-bold mb-2 text-green-600">🎉 Great Job!</h2>
+              <p className="text-gray-700 mb-4">{motivationMessages[Math.floor(Math.random() * motivationMessages.length)]}</p>
+              <button onClick={() => setShowMotivation(false)} className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition">Close</button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 💬 Marquee */}
-      <div className="mt-8 bg-white/10 text-white text-center py-3 rounded-xl shadow-inner text-sm">
-        <marquee behavior="scroll" direction="left">{motivationMessages.join(' ✨ ')}</marquee>
+        {/* 💬 Marquee */}
+        <div className="mt-8 bg-white/10 text-white text-center py-3 rounded-xl shadow-inner text-sm">
+          <marquee behavior="scroll" direction="left">{motivationMessages.join(' ✨ ')}</marquee>
+        </div>
       </div>
     </div>
   );
