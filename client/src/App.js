@@ -24,7 +24,7 @@ function App() {
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/tasks');
+      const res = await axios.get('https://taskmate-api.onrender.com/api/tasks');
       setTasks(res.data);
     } catch (err) {
       console.error("Error fetching tasks:", err.message);
@@ -34,7 +34,7 @@ function App() {
   const addTask = async () => {
     if (title && description && dueDate && category) {
       try {
-        const res = await axios.post('http://localhost:5000/api/tasks', {
+        const res = await axios.post('https://taskmate-api.onrender.com/api/tasks', {
           title,
           description,
           dueDate,
@@ -53,7 +53,7 @@ function App() {
 
   const deleteTask = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/tasks/${id}`);
+      await axios.delete(`https://taskmate-api.onrender.com/api/tasks`);
       setTasks(tasks.filter(task => task._id !== id));
     } catch (err) {
       console.error("Error deleting task:", err.message);
@@ -62,7 +62,7 @@ function App() {
 
   const toggleTask = async (id, completed) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/tasks/${id}`, { completed: !completed });
+      const res = await axios.put(`https://taskmate-api.onrender.com/api/tasks`, { completed: !completed });
       setTasks(tasks.map(t => (t._id === id ? res.data : t)));
       if (!completed) setShowMotivation(true);
     } catch (err) {
