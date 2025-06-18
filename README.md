@@ -1,4 +1,4 @@
- # Task Mate - Fullstack To-Do List Web App
+# Task Mate - Fullstack To-Do List Web App
 
 https://www.loom.com/share/903af6cc33c6482f9de9cacbaaa5adff?sid=0d5dd85e-9a70-4623-9696-d8b8d105d9f6
 
